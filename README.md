@@ -184,9 +184,6 @@ Certifique-se de estar na raiz do projeto e rode os seguintes comando:
 ```go
 go get -d -v ./...
 
-# Or 
-go get
-
 # Maybe you need this
 go mod tidy
 ```
@@ -195,11 +192,11 @@ Ou você pode tentar, instalar todos manulamente
 ```go
 go mod tidy
 
-go get -u github.com/dgrijalva/jwt-go
-go get -u github.com/cosmtrek/air
-go get -u github.com/gorilla/mux v1.8.0
-go get -u github.com/jmoiron/sqlx v1.3.4
-go get -u github.com/joho/godotenv v1.4.0
+go get -u github.com/dgrijalva/jwt-go &&
+go get -u github.com/cosmtrek/air &&
+go get -u github.com/gorilla/mux &&
+go get -u github.com/jmoiron/sqlx &&
+go get -u github.com/joho/godotenv &&
 go get -u github.com/lib/pq
 ```
 
