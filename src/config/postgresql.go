@@ -1,56 +1,18 @@
 package config
 
-// import (
-// 	"database/sql"
-// 	"os"
+import (
+	"os"
 
-// 	"github.com/jmoiron/sqlx"
-// 	_ "github.com/lib/pq"
-// )
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
+)
 
-// func Open(dbsourse string) (db *sqlx.DB, err error) {
-// 	db, err = sqlx.Open("postgres", dbsourse)
-// 	if err != nil {
-// 		return
-// 	}
+// America/Sao_Paulo
+func OpenDB() (*gorm.DB, error) {
+	db, err := gorm.Open(postgres.Open(os.Getenv("DATA_SOURCE_NAME")), &gorm.Config{})
+	if err != nil {
+		return nil, err
+	}
 
-// 	err = db.Ping()
-// 	if err != nil {
-// 		return
-// 	}
-
-// 	return
-// }
-
-// func Select(sql string) (*sql.Rows, error) {
-
-// 	db, err := Open(
-// 		os.Getenv("DB_SOURCE"),
-// 	)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	result, err := db.Query(sql)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	return result, nil
-// }
-
-// func Delete(sql string) (sql.Result, error) {
-// 	db, err := Open(
-// 		os.Getenv("DB_SOURCE"),
-// 	)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	result, err := db.Exec(sql)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	return result, nil
-// }
+	return db, nil
+}

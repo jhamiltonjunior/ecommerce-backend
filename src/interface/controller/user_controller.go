@@ -1,8 +1,12 @@
 /**
- * Created by GoLand.
+ * Created by GoLang.
  * User: josehamiltonsantosjunior@gmail.com
  * Date: 2018-03-10
  * Time: 17:01
+ *
+ *
+ * You are free to modify and share this project or its files.
+ *
  */
 
 package controller
@@ -14,6 +18,7 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/jhamiltonjunior/blog-backend/src/config"
 )
 
 // The User struct is responsible for getting the req.Body and inserting it into the database
@@ -23,17 +28,23 @@ import (
 //  /api/v{n}/authenticate
 // Here I just create the user, I don't have any JWT authenticate here
 type User struct {
-	ID int `json:"user_id" db:"user_id"`
+	ID uint `json:"user_id" gorm:"primaryKey; autoIncrement"`
 
 	// I put Name, because if I put UserName when going to use
 	// would have to call user.UserName and I don't like that
 	// user.Name is already implied
-	Name      string    `json:"username" db:"username"`
-	FullName  string    `json:"fullname" db:"fullname"`
-	Email     string    `json:"email" db:"email"`
-	Password  string    `json:"passwd" db:"passwd"`
-	CreatedAt string    `json:"created_at" db:"created_at"`
-	UpdatedAt time.Time `json:"updated_at" db:"updated_at"`
+	//  used for get in user account
+	Login string `json:"login" gorm:"unique; not null"`
+	// this is full name of people
+	// not is used for get in
+	FullName string `json:"fullname"`
+	// also used for get in user account
+	Email    string `json:"email" gorm:"type: varchar(100); unique; not null"`
+	Password string `json:"password"`
+
+	// the timestamp
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 // CreateUser There is an error here in returning user data
@@ -51,6 +62,27 @@ type User struct {
 func (user *User) CreateUser() http.HandlerFunc {
 	return func(response http.ResponseWriter, req *http.Request) {
 		json.NewDecoder(req.Body).Decode(user)
+
+		db, err := config.OpenDB()
+		if err != nil {
+			json.NewEncoder(response).Encode(map[string]string{
+				"message": fmt.Sprint(err),
+			})
+			return
+		}
+
+		db.Create(&user)
+
+		user.CreatedAt = time.Now()
+
+		if user.ID == 0 {
+			json.NewEncoder(response).Encode(map[string]string{
+				"message": "email or login already exist!",
+			})
+
+			return
+		}
+
 		// if err != nil {
 		// 	response.WriteHeader(http.StatusInternalServerError)
 		// 	json.NewEncoder(response).Encode(map[string]string{
@@ -66,7 +98,7 @@ func (user *User) CreateUser() http.HandlerFunc {
 		user.Password = ""
 
 		response.WriteHeader(http.StatusCreated)
-		json.NewEncoder(response).Encode(user)
+		json.NewEncoder(response).Encode(&user)
 	}
 
 }
@@ -101,7 +133,7 @@ func (user *User) ListUniqueUser() http.HandlerFunc {
 		params := mux.Vars(request)
 
 		fmt.Println(params)
-	
+
 		json.NewEncoder(response).Encode(user)
 	}
 }
