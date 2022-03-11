@@ -21,6 +21,12 @@ import (
 	"github.com/jhamiltonjunior/blog-backend/src/config"
 )
 
+var (
+	errDuplicateEmail = fmt.Errorf(
+		`ERROR: duplicate key value violates unique constraint \"users_email_key\" (SQLSTATE 23505)`,
+	)
+)
+
 // The User struct is responsible for getting the req.Body and inserting it into the database
 // and the same is responsible for "porpulating" the JSON that returns from the database
 //
@@ -34,7 +40,7 @@ type User struct {
 	// would have to call user.UserName and I don't like that
 	// user.Name is already implied
 	//  used for get in user account
-	Login string `json:"login" gorm:"unique; not null"`
+	// Login string `json:"login" gorm:"unique; not null"`
 	// this is full name of people
 	// not is used for get in
 	FullName string `json:"fullname"`
@@ -47,18 +53,6 @@ type User struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
-// CreateUser There is an error here in returning user data
-// it doesn't show the ID correctly, nor the Creation Date
-// even though the user was created
-// if you go in the route that shows all users you will see that
-// he was raised
-// Don't worry
-// this could be changed in new feature
-//
-//  "user_id": 0,
-//  "created_at": "",
-//  "updated_at": ""
-//
 func (user *User) CreateUser() http.HandlerFunc {
 	return func(response http.ResponseWriter, req *http.Request) {
 		json.NewDecoder(req.Body).Decode(user)
@@ -68,29 +62,25 @@ func (user *User) CreateUser() http.HandlerFunc {
 			json.NewEncoder(response).Encode(map[string]string{
 				"message": fmt.Sprint(err),
 			})
+
+			// the return after the error the application continues that prevents
 			return
 		}
 
-		db.Create(&user)
+		result := db.Create(&user)
 
-		user.CreatedAt = time.Now()
-
-		if user.ID == 0 {
+		fmt.Println(result.Error)
+		
+		if result.Error != errDuplicateEmail {
 			json.NewEncoder(response).Encode(map[string]string{
-				"message": "email or login already exist!",
+				"message": "Este email já existe!",
+				// "message": fmt.Sprint(result.Error),
 			})
 
 			return
 		}
 
-		// if err != nil {
-		// 	response.WriteHeader(http.StatusInternalServerError)
-		// 	json.NewEncoder(response).Encode(map[string]string{
-		// 		"message": fmt.Sprintf("erro in close rows: %v", err),
-		// 	})
-		// the return after the error the application continues that prevents
-		// 	return
-		// }
+
 
 		// I'm putting the "", to overwrite password,
 		// and don't display it to the end user
