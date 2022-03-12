@@ -70,6 +70,8 @@ func (user *User) CreateUser() http.HandlerFunc {
 		message := result.Error.Error()
 
 		if message == emailIsDuplicate {
+			response.WriteHeader(http.StatusBadRequest)
+
 			json.NewEncoder(response).Encode(map[string]string{
 				"message": "This email already exist, try another!",
 			})
