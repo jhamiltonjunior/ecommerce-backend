@@ -92,26 +92,6 @@ func (user *User) CreateUser() http.HandlerFunc {
 
 }
 
-// ListAllUser will list ALL users that are registered in the database
-// that's right, if there are 1 thousand users I advise you to put another 8 or 16 GB's of RAM
-// on your machine
-//
-// In a new feature, a DESC LIMIT {NUMBER} OFFSET {NUMBER} could be placed in the query
-// This will prevent server crashes or slowdowns.
-//
-// Can you imagine having to list 1000 users for 20 people at the same time?
-//
-// Consider being very careful with this.
-//
-// Why wasn't this implemented?
-//
-// This function shouldn't even exist!
-// I ended up creating this function by accident, now it's a feature
-func (user *User) ListAllUser() http.HandlerFunc {
-	return func(response http.ResponseWriter, request *http.Request) {
-		json.NewEncoder(response).Encode("user")
-	}
-}
 
 // ListUniqueUser Wil list a single user by id of url
 //  /api/v{1}/user/{id:[0-9]+}
