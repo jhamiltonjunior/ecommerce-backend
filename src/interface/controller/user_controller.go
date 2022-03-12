@@ -21,12 +21,6 @@ import (
 	"github.com/jhamiltonjunior/blog-backend/src/config"
 )
 
-var (
-	errDuplicateEmail = fmt.Errorf(
-		`ERROR: duplicate key value violates unique constraint \"users_email_key\" (SQLSTATE 23505)`,
-	)
-)
-
 // The User struct is responsible for getting the req.Body and inserting it into the database
 // and the same is responsible for "porpulating" the JSON that returns from the database
 //
@@ -43,7 +37,7 @@ type User struct {
 	// Login string `json:"login" gorm:"unique; not null"`
 	// this is full name of people
 	// not is used for get in
-	FullName string `json:"fullname"`
+	FullName string `json:"full_name"`
 	// also used for get in user account
 	Email    string `json:"email" gorm:"type: varchar(100); unique; not null"`
 	Password string `json:"password"`
@@ -69,12 +63,15 @@ func (user *User) CreateUser() http.HandlerFunc {
 
 		result := db.Create(&user)
 
-		fmt.Println(result.Error)
+		fmt.Println("\n", result.Error)
 		
-		if result.Error != errDuplicateEmail {
+		emailIsDuplicate := IsDuplicate("users_email_key")
+
+		message := result.Error.Error()
+
+		if message == emailIsDuplicate {
 			json.NewEncoder(response).Encode(map[string]string{
-				"message": "Este email já existe!",
-				// "message": fmt.Sprint(result.Error),
+				"message": "This email already exist, try another!",
 			})
 
 			return
