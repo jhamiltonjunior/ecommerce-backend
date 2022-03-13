@@ -32,19 +32,20 @@ var (
 //  /api/v{n}/authenticate
 // Here I just create the user, I don't have any JWT authenticate here
 type User struct {
-	ID uint `json:"user_id" gorm:"primaryKey; default:uuid.New()"`
+	ID int `json:"user_id" gorm:"primaryKey; autoIncrement; not null"`
 
 	// I put Name, because if I put UserName when going to use
 	// would have to call user.UserName and I don't like that
 	// user.Name is already implied
 	//  used for get in user account
-	// Login string `json:"login" gorm:"unique; not null"`
+	// UserName string `json:"username" gorm:"unique; not null"`
+
 	// this is full name of people
 	// not is used for get in
 	FullName string `json:"full_name"`
 	// also used for get in user account
 	Email    string `json:"email" gorm:"type: varchar(100); unique; not null"`
-	Password string `json:"password"`
+	Password string `json:"password" gorm:"not null"`
 
 	// the timestamp
 	CreatedAt time.Time `json:"created_at"`
@@ -111,25 +112,24 @@ func (user User) ShowUser() http.HandlerFunc {
 			return
 		}
 
-		fmt.Println(params["id"])
+		// result := db.Last(&user, "id = ?", params["id"])
+		result := db.Where("id = ?", params["id"]).Or("id = ?", params["id"]).Find(&user)
 
-		result := db.Take(&user)
-
-		fmt.Println(result)
+		fmt.Println(result.RowsAffected)
+		// rows := result.RowsAffected
 
 		user.Password = ""
 
 		// message := result.Error
-
-		// if message == errValueNotExist {
+		// if rows == 0 {
 		// 	response.WriteHeader(http.StatusBadRequest)
-
-		// 	json.NewEncoder(response).Encode(message)
-
+		// 	json.NewEncoder(response).Encode(map[string]string{
+		// 		"message": "This user not exist!",
+		// 	})
 		// 	return
 		// }
 
-		json.NewEncoder(response).Encode(&user)
+		json.NewEncoder(response).Encode(user)
 	}
 }
 

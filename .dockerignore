@@ -1,1 +1,7 @@
 timer/
+img/
+tmp/
+.air.toml
+.env.example
+showme.txt
+go.code-workspace
