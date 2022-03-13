@@ -1,0 +1,1 @@
+é preciso observar os paradigmas de orientação a objeto. Há persistência de dados nos controllers por exemplo e isso não é uma boa pratica. O uso do docker falicitaria muito o setup do ambiente local e de produção.

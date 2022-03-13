@@ -21,6 +21,10 @@ import (
 	"github.com/jhamiltonjunior/blog-backend/src/config"
 )
 
+var (
+// errValueNotExist = fmt.Errorf("record not found")
+)
+
 // The User struct is responsible for getting the req.Body and inserting it into the database
 // and the same is responsible for "porpulating" the JSON that returns from the database
 //
@@ -28,7 +32,7 @@ import (
 //  /api/v{n}/authenticate
 // Here I just create the user, I don't have any JWT authenticate here
 type User struct {
-	ID uint `json:"user_id" gorm:"primaryKey; autoIncrement"`
+	ID uint `json:"user_id" gorm:"primaryKey; default:uuid.New()"`
 
 	// I put Name, because if I put UserName when going to use
 	// would have to call user.UserName and I don't like that
@@ -53,6 +57,7 @@ func (user *User) CreateUser() http.HandlerFunc {
 
 		db, err := config.OpenDB()
 		if err != nil {
+			response.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(response).Encode(map[string]string{
 				"message": fmt.Sprint(err),
 			})
@@ -63,10 +68,7 @@ func (user *User) CreateUser() http.HandlerFunc {
 
 		result := db.Create(&user)
 
-		fmt.Println("\n", result.Error)
-		
 		emailIsDuplicate := IsDuplicate("users_email_key")
-
 		message := result.Error.Error()
 
 		if message == emailIsDuplicate {
@@ -79,8 +81,6 @@ func (user *User) CreateUser() http.HandlerFunc {
 			return
 		}
 
-
-
 		// I'm putting the "", to overwrite password,
 		// and don't display it to the end user
 		// please do not use this in frontend application
@@ -92,18 +92,44 @@ func (user *User) CreateUser() http.HandlerFunc {
 
 }
 
-
-// ListUniqueUser Wil list a single user by id of url
+// ShowUser Wil list a single user by id of url
 //  /api/v{1}/user/{id:[0-9]+}
 // If there is no error it will return a JSON with the referring user
 // to the id of the url
-func (user *User) ListUniqueUser() http.HandlerFunc {
+func (user User) ShowUser() http.HandlerFunc {
 	return func(response http.ResponseWriter, request *http.Request) {
 		params := mux.Vars(request)
 
-		fmt.Println(params)
+		db, err := config.OpenDB()
+		if err != nil {
+			response.WriteHeader(http.StatusInternalServerError)
 
-		json.NewEncoder(response).Encode(user)
+			json.NewEncoder(response).Encode(map[string]string{
+				"message": fmt.Sprint(err),
+			})
+
+			return
+		}
+
+		fmt.Println(params["id"])
+
+		result := db.Take(&user)
+
+		fmt.Println(result)
+
+		user.Password = ""
+
+		// message := result.Error
+
+		// if message == errValueNotExist {
+		// 	response.WriteHeader(http.StatusBadRequest)
+
+		// 	json.NewEncoder(response).Encode(message)
+
+		// 	return
+		// }
+
+		json.NewEncoder(response).Encode(&user)
 	}
 }
 
