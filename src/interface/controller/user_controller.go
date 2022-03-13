@@ -116,18 +116,18 @@ func (user User) ShowUser() http.HandlerFunc {
 		result := db.Where("id = ?", params["id"]).Or("id = ?", params["id"]).Find(&user)
 
 		fmt.Println(result.RowsAffected)
-		// rows := result.RowsAffected
+		rows := result.RowsAffected
 
 		user.Password = ""
 
 		// message := result.Error
-		// if rows == 0 {
-		// 	response.WriteHeader(http.StatusBadRequest)
-		// 	json.NewEncoder(response).Encode(map[string]string{
-		// 		"message": "This user not exist!",
-		// 	})
-		// 	return
-		// }
+		if rows == 0 {
+			response.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(response).Encode(map[string]string{
+				"message": "This user not exist!",
+			})
+			return
+		}
 
 		json.NewEncoder(response).Encode(user)
 	}
