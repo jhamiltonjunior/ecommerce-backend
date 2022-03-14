@@ -17,12 +17,14 @@ import (
 	"net/http"
 	"time"
 
+	"golang.org/x/crypto/bcrypt"
 	"github.com/gorilla/mux"
 	"github.com/jhamiltonjunior/blog-backend/src/config"
 )
 
 var (
 // errValueNotExist = fmt.Errorf("record not found")
+	// emailIsDuplicate = `ERROR: duplicate key value violates unique constraint "users_email_key" (SQLSTATE 23505)`
 )
 
 // The User struct is responsible for getting the req.Body and inserting it into the database
@@ -45,7 +47,7 @@ type User struct {
 	FullName string `json:"full_name"`
 	// also used for get in user account
 	Email    string `json:"email" gorm:"type: varchar(100); unique; not null"`
-	Password string `json:"password" gorm:"not null"`
+	Password []byte `json:"password" gorm:"not null"`
 
 	// the timestamp
 	CreatedAt time.Time `json:"created_at"`
@@ -67,6 +69,11 @@ func (user *User) CreateUser() http.HandlerFunc {
 			return
 		}
 
+		// se o bcrypt falhar o usuário não poderá ser criado de forma alguma
+		// pois é provavél que a senha vai está com valor null, ainda que passe daqui,
+		// já está setado no banco de dados para que a senha seja not null
+		user.Password, _ = bcrypt.GenerateFromPassword([]byte(user.Password), 15)
+		
 		result := db.Create(&user)
 
 		emailIsDuplicate := IsDuplicate("users_email_key")
@@ -85,7 +92,7 @@ func (user *User) CreateUser() http.HandlerFunc {
 		// I'm putting the "", to overwrite password,
 		// and don't display it to the end user
 		// please do not use this in frontend application
-		user.Password = ""
+		// user.Password = ""
 
 		response.WriteHeader(http.StatusCreated)
 		json.NewEncoder(response).Encode(&user)
@@ -112,10 +119,8 @@ func (user User) ShowUser() http.HandlerFunc {
 			return
 		}
 
-		// result := db.Last(&user, "id = ?", params["id"])
+		// result := db.Find(&user, "id = ?", params["id"])
 		result := db.Where("id = ?", params["id"]).Or("id = ?", params["id"]).Find(&user)
-
-		user.Password = ""
 
 		if result.RowsAffected == 0 {
 			response.WriteHeader(http.StatusBadRequest)
@@ -125,6 +130,7 @@ func (user User) ShowUser() http.HandlerFunc {
 			return
 		}
 
+		// user.Password = []byte("")
 		json.NewEncoder(response).Encode(user)
 	}
 }
