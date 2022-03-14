@@ -17,14 +17,14 @@ import (
 	"net/http"
 	"time"
 
-	"golang.org/x/crypto/bcrypt"
 	"github.com/gorilla/mux"
 	"github.com/jhamiltonjunior/blog-backend/src/config"
+	"golang.org/x/crypto/bcrypt"
 )
 
 var (
 // errValueNotExist = fmt.Errorf("record not found")
-	// emailIsDuplicate = `ERROR: duplicate key value violates unique constraint "users_email_key" (SQLSTATE 23505)`
+// emailIsDuplicate = `ERROR: duplicate key value violates unique constraint "users_email_key" (SQLSTATE 23505)`
 )
 
 // The User struct is responsible for getting the req.Body and inserting it into the database
@@ -34,7 +34,7 @@ var (
 //  /api/v{n}/authenticate
 // Here I just create the user, I don't have any JWT authenticate here
 type User struct {
-	ID int `json:"user_id" gorm:"primaryKey; autoIncrement; not null"`
+	ID uint `json:"user_id" gorm:"autoIncrement"`
 
 	// I put Name, because if I put UserName when going to use
 	// would have to call user.UserName and I don't like that
@@ -54,13 +54,14 @@ type User struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
-func (user *User) CreateUser() http.HandlerFunc {
+func (user User) CreateUser() http.HandlerFunc {
 	return func(response http.ResponseWriter, req *http.Request) {
-		json.NewDecoder(req.Body).Decode(user)
+		json.NewDecoder(req.Body).Decode(&user)
 
 		db, err := config.OpenDB()
 		if err != nil {
 			response.WriteHeader(http.StatusInternalServerError)
+
 			json.NewEncoder(response).Encode(map[string]string{
 				"message": fmt.Sprint(err),
 			})
@@ -72,27 +73,41 @@ func (user *User) CreateUser() http.HandlerFunc {
 		// se o bcrypt falhar o usuário não poderá ser criado de forma alguma
 		// pois é provavél que a senha vai está com valor null, ainda que passe daqui,
 		// já está setado no banco de dados para que a senha seja not null
-		user.Password, _ = bcrypt.GenerateFromPassword([]byte(user.Password), 15)
-		
-		result := db.Create(&user)
+		user.Password, _ = bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 
-		emailIsDuplicate := IsDuplicate("users_email_key")
-		message := result.Error.Error()
+		if result := db.Create(&user); result.Error != nil {
+			emailIsDuplicate := IsDuplicate("users_email_key")
+			message := result.Error.Error()
 
-		if message == emailIsDuplicate {
-			response.WriteHeader(http.StatusBadRequest)
+			// fmt.Println(result.Error.Error())
 
+			// fmt.Println(result.RowsAffected)
+
+			if message == emailIsDuplicate {
+				response.WriteHeader(http.StatusBadRequest)
+
+				json.NewEncoder(response).Encode(map[string]string{
+					"message": "This email already exist, try another!",
+				})
+
+				return
+			}
+
+			response.WriteHeader(http.StatusInternalServerError)
+
+			// Se a condição anterior for false esse json vai ser enviado
+			// se for true esse json não será enviado, por causo do return no fim do if
 			json.NewEncoder(response).Encode(map[string]string{
-				"message": "This email already exist, try another!",
+				"message": result.Error.Error(),
 			})
 
 			return
 		}
 
-		// I'm putting the "", to overwrite password,
+		// I'm putting the nil, to overwrite password,
 		// and don't display it to the end user
 		// please do not use this in frontend application
-		// user.Password = ""
+		// user.Password = nil
 
 		response.WriteHeader(http.StatusCreated)
 		json.NewEncoder(response).Encode(&user)
