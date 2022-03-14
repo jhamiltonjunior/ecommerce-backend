@@ -79,9 +79,9 @@ func (user User) CreateUser() http.HandlerFunc {
 			emailIsDuplicate := IsDuplicate("users_email_key")
 			message := result.Error.Error()
 
-			// fmt.Println(result.Error.Error())
+			fmt.Println(result.Error.Error())
 
-			// fmt.Println(result.RowsAffected)
+			fmt.Println(result.RowsAffected)
 
 			if message == emailIsDuplicate {
 				response.WriteHeader(http.StatusBadRequest)
