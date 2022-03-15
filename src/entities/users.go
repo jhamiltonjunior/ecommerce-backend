@@ -3,7 +3,7 @@ package entities
 import "time"
 
 type User struct {
-	ID uint `json:"user_id" gorm:"id; primaryKey; autoIncrement;"`
+	ID int64 `json:"user_id" gorm:"id; primaryKey; autoIncrement;"`
 
 	// I put Name, because if I put UserName when going to use
 	// would have to call user.UserName and I don't like that
@@ -21,6 +21,14 @@ type User struct {
 	Password []byte `json:"password" gorm:"password; not null"`
 
 	// the timestamp
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+}
+
+type UserWithoutPassword struct {
+	ID int64 `json:"user_id" gorm:"id; primaryKey; autoIncrement;"`
+	FullName string `json:"full_name"`
+	Email    string `json:"email" gorm:"email; type: varchar(100); unique; not null"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }

@@ -1,4 +1,4 @@
-package router
+package routes
 
 import "github.com/jhamiltonjunior/ecommerce-backend/src/controllers"
 
@@ -13,7 +13,7 @@ import "github.com/jhamiltonjunior/ecommerce-backend/src/controllers"
 // Ela tambem faz parte do Server struct
 // 
 func (server *Server) Authenticate() {
-	auth := controller.Auth{}
+	auth := controllers.Auth{}
 
 	server.HandleFunc("/api/v1/authenticate", auth.Authenticate()).Methods("POST")
 

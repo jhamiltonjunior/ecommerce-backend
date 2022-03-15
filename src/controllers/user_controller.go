@@ -9,14 +9,14 @@
  *
  */
 
-package controller
+package controllers
 
 import (
 	"encoding/json"
 	"fmt"
 	"net/http"
 
-	"github.com/gorilla/mux"
+	// "github.com/gorilla/mux"
 	"github.com/jhamiltonjunior/ecommerce-backend/src/configs"
 	"github.com/jhamiltonjunior/ecommerce-backend/src/entities"
 	"golang.org/x/crypto/bcrypt"
@@ -33,9 +33,8 @@ var (
 // Please you from the frontend, redirect the user to the route
 //  /api/v{n}/authenticate
 // Here I just create the user, I don't have any JWT authenticate here
-
-
-func (user *entities.User) CreateUser() http.HandlerFunc {
+func CreateUser() http.HandlerFunc {
+	var user *entities.User
 	return func(response http.ResponseWriter, req *http.Request) {
 		json.NewDecoder(req.Body).Decode(&user)
 
@@ -95,7 +94,7 @@ func (user *entities.User) CreateUser() http.HandlerFunc {
 	}
 
 }
-
+/*
 // ShowUser Wil list a single user by id of url
 //  /api/v{1}/user/{id:[0-9]+}
 // If there is no error it will return a JSON with the referring user
@@ -161,3 +160,4 @@ func (user *User) DeleteUser() http.HandlerFunc {
 		})
 	}
 }
+*/
