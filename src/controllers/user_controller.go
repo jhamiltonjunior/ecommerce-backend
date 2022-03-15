@@ -12,6 +12,7 @@
 package controllers
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -19,6 +20,7 @@ import (
 	// "github.com/gorilla/mux"
 	"github.com/jhamiltonjunior/ecommerce-backend/src/configs"
 	"github.com/jhamiltonjunior/ecommerce-backend/src/entities"
+	"github.com/jhamiltonjunior/ecommerce-backend/src/repositories"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -39,62 +41,86 @@ func CreateUser() http.HandlerFunc {
 	return func(response http.ResponseWriter, req *http.Request) {
 		json.NewDecoder(req.Body).Decode(&user)
 
-		db, err := configs.OpenDB()
+		// se o bcrypt falhar o usuário não poderá ser criado de forma alguma
+		// pois é provavél que a senha vai está com valor null, ainda que passe daqui,
+		// já está setado no banco de dados para que a senha seja not null
+		hash, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 		if err != nil {
 			response.WriteHeader(http.StatusInternalServerError)
 
 			json.NewEncoder(response).Encode(map[string]string{
 				"message": fmt.Sprint(err),
+				"Bcrypt":  "Hash not created",
 			})
 
 			// the return after the error the application continues that prevents
 			return
 		}
 
-		// se o bcrypt falhar o usuário não poderá ser criado de forma alguma
-		// pois é provavél que a senha vai está com valor null, ainda que passe daqui,
-		// já está setado no banco de dados para que a senha seja not null
-		user.Password, _ = bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+		repos := repositories.New(repositories.Options{
+			ReaderSqlx: configs.GetReaderSqlx(),
+			WriterSqlx: configs.GetWriterSqlx(),
+		})
 
-		if result := db.Create(&user); result.Error != nil {
-			emailIsDuplicate := IsDuplicate("users_email_key")
-			message := result.Error.Error()
-
-			fmt.Println(result.Error.Error())
-
-			fmt.Println(result.RowsAffected)
-
-			if message == emailIsDuplicate {
-				response.WriteHeader(http.StatusBadRequest)
-
-				json.NewEncoder(response).Encode(map[string]string{
-					"message": "This email already exist, try another!",
-				})
-
-				return
-			}
+		err = repos.User.Create(context.Background(), entities.User{
+			FullName: user.FullName,
+			Email:    user.Email,
+			Password: hash,
+		})
+		if err != nil {
+			fmt.Println(err)
 
 			response.WriteHeader(http.StatusInternalServerError)
-
-			// Se a condição anterior for false esse json vai ser enviado
-			// se for true esse json não será enviado, por causo do return no fim do if
+			
 			json.NewEncoder(response).Encode(map[string]string{
-				"message": result.Error.Error(),
+				"message": fmt.Sprint(err),
 			})
 
 			return
 		}
+
+		// if result := db.Create(&user); result.Error != nil {
+		// 	emailIsDuplicate := IsDuplicate("users_email_key")
+		// 	message := result.Error.Error()
+
+		// 	fmt.Println(result.Error.Error())
+
+		// 	fmt.Println(result.RowsAffected)
+
+		// 	if message == emailIsDuplicate {
+		// 		response.WriteHeader(http.StatusBadRequest)
+
+		//
+
+		// 		return
+		// 	}
+
+		// 	response.WriteHeader(http.StatusInternalServerError)
+
+		// 	// Se a condição anterior for false esse json vai ser enviado
+		// 	// se for true esse json não será enviado, por causo do return no fim do if
+		// 	json.NewEncoder(response).Encode(map[string]string{
+		// 		"message": result.Error.Error(),
+		// 	})
+
+		// 	return
+		// }
 
 		// I'm putting the nil, to overwrite password,
 		// and don't display it to the end user
 		// please do not use this in frontend application
 		// user.Password = nil
 
+		// user entities.User{}
+
 		response.WriteHeader(http.StatusCreated)
-		json.NewEncoder(response).Encode(&user)
+		json.NewEncoder(response).Encode(map[string]string{
+			"Success": fmt.Sprintf("user: %v, created with success!", user.FullName),
+		})
 	}
 
 }
+
 /*
 // ShowUser Wil list a single user by id of url
 //  /api/v{1}/user/{id:[0-9]+}

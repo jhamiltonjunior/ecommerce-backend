@@ -18,7 +18,7 @@ func NewSqlxRespository(w *sqlx.DB, r *sqlx.DB) UserRepository {
 
 func (repo *repoSqlx) Create(ctx context.Context, newUser entities.User) error {
 	_, err := repo.writer.ExecContext(ctx, `
-		INSERT INTO users (full_name, email, password) VALUES (?, ?, ?)
+		INSERT INTO users (full_name, email, password) VALUES ($1, $2, $3) RETURNING *
 	`, newUser.FullName, newUser.Email, newUser.Password)
 	if err != nil {
 		return err

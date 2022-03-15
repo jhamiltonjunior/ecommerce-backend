@@ -1,7 +1,8 @@
 package routes
 
-import "github.com/jhamiltonjunior/ecommerce-backend/src/entities"
-
+import (
+	"github.com/jhamiltonjunior/ecommerce-backend/src/controllers"
+)
 
 // This function will manage user routes
 //
@@ -17,14 +18,12 @@ import "github.com/jhamiltonjunior/ecommerce-backend/src/entities"
 //
 func (server *Server) User() {
 
-	user := entities.User{}
+	// user := entities.User{}
 
-	server.HandleFunc("/api/v1/user", user.CreateUser()).Methods("POST")
+	server.HandleFunc("/api/v1/user", controllers.CreateUser()).Methods("POST")
 
-	server.HandleFunc("/api/v1/user/{id:[0-9]+}", user.ShowUser()).Methods("GET")
-	server.HandleFunc("/api/v1/user/{id:[0-9]+}", user.DeleteUser()).Methods("DELETE")
+	// server.HandleFunc("/api/v1/user/{id:[0-9]+}", user.ShowUser()).Methods("GET")
+	// server.HandleFunc("/api/v1/user/{id:[0-9]+}", user.DeleteUser()).Methods("DELETE")
 
-	server.HandleFunc("/api/v1/user/{id:[0-9]+}/edit", user.UpdateUser()).Methods("PUT")
+	// server.HandleFunc("/api/v1/user/{id:[0-9]+}/edit", user.UpdateUser()).Methods("PUT")
 }
-
-
