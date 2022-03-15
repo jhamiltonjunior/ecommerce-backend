@@ -1,4 +1,4 @@
-module github.com/jhamiltonjunior/blog-backend
+module github.com/jhamiltonjunior/ecommerce-backend
 
 go 1.17
 

@@ -1,6 +1,6 @@
 package router
 
-import "github.com/jhamiltonjunior/blog-backend/src/interface/controller"
+import "github.com/jhamiltonjunior/ecommerce-backend/src/controllers"
 
 // Authenticate() is responsible for handling user authentication
 //

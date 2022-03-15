@@ -15,10 +15,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/jhamiltonjunior/blog-backend/src/config"
+	"github.com/jhamiltonjunior/ecommerce-backend/src/configs"
+	"github.com/jhamiltonjunior/ecommerce-backend/src/entities"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -33,28 +33,9 @@ var (
 // Please you from the frontend, redirect the user to the route
 //  /api/v{n}/authenticate
 // Here I just create the user, I don't have any JWT authenticate here
-type User struct {
-	ID uint `json:"user_id" gorm:"autoIncrement"`
 
-	// I put Name, because if I put UserName when going to use
-	// would have to call user.UserName and I don't like that
-	// user.Name is already implied
-	//  used for get in user account
-	// UserName string `json:"username" gorm:"unique; not null"`
 
-	// this is full name of people
-	// not is used for get in
-	FullName string `json:"full_name"`
-	// also used for get in user account
-	Email    string `json:"email" gorm:"type: varchar(100); unique; not null"`
-	Password []byte `json:"password" gorm:"not null"`
-
-	// the timestamp
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
-}
-
-func (user User) CreateUser() http.HandlerFunc {
+func (user *entities.User) CreateUser() http.HandlerFunc {
 	return func(response http.ResponseWriter, req *http.Request) {
 		json.NewDecoder(req.Body).Decode(&user)
 
@@ -163,7 +144,7 @@ func (user *User) UpdateUser() http.HandlerFunc {
 
 		json.NewDecoder(request.Body).Decode(user)
 
-		user.UpdatedAt = time.Now()
+		// user.UpdatedAt = time.Now()
 
 		json.NewEncoder(response).Encode(user)
 	}

@@ -16,7 +16,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/jhamiltonjunior/blog-backend/src/interface/router"
+	"github.com/jhamiltonjunior/ecommerce-backend/src/routes"
 	"github.com/joho/godotenv"
 )
 
@@ -35,7 +35,7 @@ func main() {
 		fmt.Println(err)
 	}
 
-	router.NewServer()
+	routes.NewServer()
 
 	fmt.Printf("server listen in port%s \n", port)
 

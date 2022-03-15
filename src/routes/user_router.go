@@ -1,8 +1,7 @@
 package router
 
-import (
-	"github.com/jhamiltonjunior/blog-backend/src/interface/controller"
-)
+import "github.com/jhamiltonjunior/ecommerce-backend/src/entities"
+
 
 // This function will manage user routes
 //
@@ -18,7 +17,7 @@ import (
 //
 func (server *Server) User() {
 
-	user := controller.User{}
+	user := entities.User{}
 
 	server.HandleFunc("/api/v1/user", user.CreateUser()).Methods("POST")
 

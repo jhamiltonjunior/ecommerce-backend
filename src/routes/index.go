@@ -4,8 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
-	"github.com/jhamiltonjunior/blog-backend/src/interface/middleware"
-
+	"github.com/jhamiltonjunior/ecommerce-backend/src/middlewares"
 )
 
 type Server struct {
@@ -38,8 +37,8 @@ func NewServer() *Server {
 // That is, it will always return a JSON
 // 
 func (server *Server) routes() {
-	middlewares := server.Router
-	middlewares.Use(middleware.SetContentType)
+	middle := server.Router
+	middle.Use(middlewares.SetContentType)
 
 	server.User()
 	server.Authenticate()

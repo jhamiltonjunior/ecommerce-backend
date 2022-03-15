@@ -5,7 +5,7 @@ package infra
 // 	"os"
 // 	"time"
 
-// 	"github.com/jhamiltonjunior/priza-tech-backend/src/config"
+// 	"github.com/jhamiltonjunior/ecommerce-backend/src/config"
 // )
 
 // func InsertUser(sql, username, fullname, email, passwd string) (sql.Result, error) {
