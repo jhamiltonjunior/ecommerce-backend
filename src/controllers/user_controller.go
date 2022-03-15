@@ -23,6 +23,8 @@ import (
 )
 
 var (
+	user *entities.User
+
 // errValueNotExist = fmt.Errorf("record not found")
 // emailIsDuplicate = `ERROR: duplicate key value violates unique constraint "users_email_key" (SQLSTATE 23505)`
 )
@@ -34,11 +36,10 @@ var (
 //  /api/v{n}/authenticate
 // Here I just create the user, I don't have any JWT authenticate here
 func CreateUser() http.HandlerFunc {
-	var user *entities.User
 	return func(response http.ResponseWriter, req *http.Request) {
 		json.NewDecoder(req.Body).Decode(&user)
 
-		db, err := config.OpenDB()
+		db, err := configs.OpenDB()
 		if err != nil {
 			response.WriteHeader(http.StatusInternalServerError)
 

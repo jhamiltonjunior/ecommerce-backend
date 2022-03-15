@@ -7,6 +7,7 @@ require (
 	github.com/gorilla/mux v1.8.0
 	github.com/jmoiron/sqlx v1.3.4
 	github.com/joho/godotenv v1.4.0
+	github.com/lib/pq v1.10.4
 	golang.org/x/crypto v0.0.0-20220313003712-b769efc7c000
 	gorm.io/driver/postgres v1.3.1
 	gorm.io/gorm v1.23.2
