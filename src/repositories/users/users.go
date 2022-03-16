@@ -11,7 +11,7 @@ type UserRepositories interface {
 	GetById(ctx context.Context, ID int) (*entities.UserWithoutPassword, error)
 
 	UpdateById(ctx context.Context, ID int, user entities.User) (error)
-	// DeleteById(ctx context.Context, ID int64) (string, error)
+	DeleteById(ID int) error
 
 	// GetAll(ctx context.Context) ([]entities.User, error)
 }

@@ -223,16 +223,42 @@ func UpdateUser() http.HandlerFunc {
 	}
 }
 
-/*
+
 // Will delete a user by id
-func (user *User) DeleteUser() http.HandlerFunc {
+func DeleteUser() http.HandlerFunc {
 	return func(response http.ResponseWriter, request *http.Request) {
 		params := mux.Vars(request)
-		fmt.Println(params)
+
+		id, err := strconv.Atoi(params["id"])
+		if err != nil {
+			response.WriteHeader(http.StatusBadRequest)
+
+			json.NewEncoder(response).Encode(map[string]string{
+				"message": "My bad!",
+			})
+
+			return
+		}
+
+		repos := repositories.New(repositories.Options{
+			ReaderSqlx: configs.GetReaderSqlx(),
+			WriterSqlx: configs.GetWriterSqlx(),
+		})
+
+		err = repos.User.DeleteById(id)
+		if err != nil {
+			response.WriteHeader(http.StatusInternalServerError)
+
+			json.NewEncoder(response).Encode(map[string]string{
+				"message": fmt.Sprint(err),
+			})
+		}
+
+
 
 		json.NewEncoder(response).Encode(map[string]string{
 			"message": "User deleted with success!",
 		})
 	}
 }
-*/
+

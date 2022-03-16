@@ -27,17 +27,17 @@ func (repo *repoSqlx) Create(ctx context.Context, newUser entities.User) error {
 	return nil
 }
 
-func (repo *repoSqlx) GetById(ctx context.Context, ID int) (*entities.UserWithoutPassword, error) {
+func (repo *repoSqlx) GetById(ctx context.Context, id int) (*entities.UserWithoutPassword, error) {
 	var user entities.UserWithoutPassword
 
-	err := repo.reader.GetContext(ctx, &user, `
+	err := repo.reader.Get(&user, `
 		SELECT 
 			id,
 			full_name,
 			email
 		FROM users
 		WHERE id=$1
-	`, ID)
+	`, id)
 	// created_at,
 	// updated_at
 	if err != nil {
@@ -47,7 +47,7 @@ func (repo *repoSqlx) GetById(ctx context.Context, ID int) (*entities.UserWithou
 	return &user, nil
 }
 
-func (repo *repoSqlx) UpdateById(ctx context.Context, ID int, user entities.User) error {
+func (repo *repoSqlx) UpdateById(ctx context.Context, id int, user entities.User) error {
 
 	_, err := repo.reader.ExecContext(ctx, `
 		UPDATE users
@@ -57,10 +57,17 @@ func (repo *repoSqlx) UpdateById(ctx context.Context, ID int, user entities.User
 			password = $4,
 			updated_at = $5
 		WHERE id=$1
-	`, ID, user.FullName, user.Email, user.Password, user.UpdatedAt)
+	`, id, user.FullName, user.Email, user.Password, user.UpdatedAt)
 	if err != nil {
 		return err
 	}
 
+	return nil
+}
+
+func (repo *repoSqlx) DeleteById(id int) error {
+	if _, err := repo.writer.Exec("DELETE FROM users WHERE id=$1", id); err != nil {
+		return err
+	}
 	return nil
 }
