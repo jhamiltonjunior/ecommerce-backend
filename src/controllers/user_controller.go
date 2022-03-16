@@ -16,8 +16,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	// "github.com/gorilla/mux"
+	"github.com/gorilla/mux"
 	"github.com/jhamiltonjunior/ecommerce-backend/src/configs"
 	"github.com/jhamiltonjunior/ecommerce-backend/src/entities"
 	"github.com/jhamiltonjunior/ecommerce-backend/src/repositories"
@@ -26,6 +28,7 @@ import (
 
 var (
 	user *entities.User
+	// userNotPassword *entities.UserWithoutPassword
 
 // errValueNotExist = fmt.Errorf("record not found")
 // emailIsDuplicate = `ERROR: duplicate key value violates unique constraint "users_email_key" (SQLSTATE 23505)`
@@ -49,7 +52,7 @@ func CreateUser() http.HandlerFunc {
 			response.WriteHeader(http.StatusInternalServerError)
 
 			json.NewEncoder(response).Encode(map[string]string{
-				"message": fmt.Sprint(err),
+				"message": fmt.Sprint(err, "\n"),
 				"Bcrypt":  "Hash not created",
 			})
 
@@ -71,7 +74,7 @@ func CreateUser() http.HandlerFunc {
 			fmt.Println(err)
 
 			response.WriteHeader(http.StatusInternalServerError)
-			
+
 			json.NewEncoder(response).Encode(map[string]string{
 				"message": fmt.Sprint(err),
 			})
@@ -106,13 +109,6 @@ func CreateUser() http.HandlerFunc {
 		// 	return
 		// }
 
-		// I'm putting the nil, to overwrite password,
-		// and don't display it to the end user
-		// please do not use this in frontend application
-		// user.Password = nil
-
-		// user entities.User{}
-
 		response.WriteHeader(http.StatusCreated)
 		json.NewEncoder(response).Encode(map[string]string{
 			"Success": fmt.Sprintf("user: %v, created with success!", user.FullName),
@@ -121,16 +117,31 @@ func CreateUser() http.HandlerFunc {
 
 }
 
-/*
 // ShowUser Wil list a single user by id of url
 //  /api/v{1}/user/{id:[0-9]+}
 // If there is no error it will return a JSON with the referring user
 // to the id of the url
-func (user User) ShowUser() http.HandlerFunc {
+func ShowUser() http.HandlerFunc {
 	return func(response http.ResponseWriter, request *http.Request) {
 		params := mux.Vars(request)
 
-		db, err := config.OpenDB()
+		repos := repositories.New(repositories.Options{
+			ReaderSqlx: configs.GetReaderSqlx(),
+			WriterSqlx: configs.GetWriterSqlx(),
+		})
+
+		id, err := strconv.Atoi(params["id"])
+		if err != nil {
+			response.WriteHeader(http.StatusBadRequest)
+
+			json.NewEncoder(response).Encode(map[string]string{
+				"message": "Isso reamente é um id?",
+			})
+
+			return
+		}
+
+		user, err := repos.User.GetById(context.Background(), int64(id))
 		if err != nil {
 			response.WriteHeader(http.StatusInternalServerError)
 
@@ -141,22 +152,13 @@ func (user User) ShowUser() http.HandlerFunc {
 			return
 		}
 
-		// result := db.Find(&user, "id = ?", params["id"])
-		result := db.Where("id = ?", params["id"]).Or("id = ?", params["id"]).Find(&user)
-
-		if result.RowsAffected == 0 {
-			response.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(response).Encode(map[string]string{
-				"message": "This user not exist!",
-			})
-			return
-		}
-
 		// user.Password = []byte("")
+		response.WriteHeader(http.StatusOK)
 		json.NewEncoder(response).Encode(user)
 	}
 }
 
+/*
 // This function will update the user data
 // I was using insomnia and when I updated user data 1
 // it was no longer listed at the beginning of the function

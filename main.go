@@ -1,13 +1,13 @@
 /**
-	A simple API  for Backend of E-commerce
+A simple API  for Backend of E-commerce
 
-	This file is part of undefined is not a function API.
-	You are free to modify and share this project or its files.
-	
-	Author   Hamilton Júnior <https://github.com/jhamiltonjunior>
+This file is part of undefined is not a function API.
+You are free to modify and share this project or its files.
 
-	Contact <https://www.linkedin.com/in/jhamiltonjunior>
-	Contact <mailto:josehamiltonsantosjunior@gmail.com>
+Author   Hamilton Júnior <https://github.com/jhamiltonjunior>
+
+Contact <https://www.linkedin.com/in/jhamiltonjunior>
+Contact <mailto:josehamiltonsantosjunior@gmail.com>
 */
 package main
 
@@ -33,6 +33,7 @@ func main() {
 	// Essa captura de erro é referente ao godotenv
 	if err != nil {
 		fmt.Println(err)
+		return
 	}
 
 	routes.NewServer()

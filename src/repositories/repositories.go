@@ -6,7 +6,7 @@ import (
 )
 
 type Container struct {
-	User users.UserRepository
+	User users.UserRepositories
 }
 
 type Options struct {

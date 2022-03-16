@@ -8,13 +8,13 @@ import (
 )
 
 func GetReaderSqlx() *sqlx.DB {
-	reader := sqlx.MustConnect("postgres", os.Getenv("DB_SOURCE"))
+	reader := sqlx.MustConnect("postgres", os.Getenv("DATA_SOURCE_NAME"))
 
 	return reader
 }
 
 func GetWriterSqlx() *sqlx.DB {
-	writer := sqlx.MustConnect("postgres", os.Getenv("DB_SOURCE"))
+	writer := sqlx.MustConnect("postgres", os.Getenv("DATA_SOURCE_NAME"))
 
 	return writer
 }

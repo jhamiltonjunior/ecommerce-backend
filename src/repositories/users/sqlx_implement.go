@@ -12,7 +12,7 @@ type repoSqlx struct {
 	reader *sqlx.DB
 }
 
-func NewSqlxRespository(w *sqlx.DB, r *sqlx.DB) UserRepository {
+func NewSqlxRespository(w *sqlx.DB, r *sqlx.DB) UserRepositories {
 	return &repoSqlx{writer: w, reader: r}
 }
 
@@ -25,4 +25,22 @@ func (repo *repoSqlx) Create(ctx context.Context, newUser entities.User) error {
 	}
 
 	return nil
+}
+
+func (repo *repoSqlx) GetById(ctx context.Context, ID int64) (*entities.UserWithoutPassword, error) {
+	var user entities.UserWithoutPassword
+
+	err := repo.reader.GetContext(ctx, &user, `
+		SELECT 
+			id,
+			full_name,
+			email
+		FROM users
+		WHERE id=$1
+	`, ID)
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
 }
