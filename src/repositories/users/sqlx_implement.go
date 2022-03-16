@@ -27,7 +27,7 @@ func (repo *repoSqlx) Create(ctx context.Context, newUser entities.User) error {
 	return nil
 }
 
-func (repo *repoSqlx) GetById(ctx context.Context, ID int64) (*entities.UserWithoutPassword, error) {
+func (repo *repoSqlx) GetById(ctx context.Context, ID int) (*entities.UserWithoutPassword, error) {
 	var user entities.UserWithoutPassword
 
 	err := repo.reader.GetContext(ctx, &user, `
@@ -38,9 +38,29 @@ func (repo *repoSqlx) GetById(ctx context.Context, ID int64) (*entities.UserWith
 		FROM users
 		WHERE id=$1
 	`, ID)
+	// created_at,
+	// updated_at
 	if err != nil {
 		return nil, err
 	}
 
 	return &user, nil
+}
+
+func (repo *repoSqlx) UpdateById(ctx context.Context, ID int, user entities.User) error {
+
+	_, err := repo.reader.ExecContext(ctx, `
+		UPDATE users
+		SET
+			full_name = $2,
+			email = $3,
+			password = $4,
+			updated_at = $5
+		WHERE id=$1
+	`, ID, user.FullName, user.Email, user.Password, user.UpdatedAt)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

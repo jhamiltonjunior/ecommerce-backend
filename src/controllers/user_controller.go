@@ -17,6 +17,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"time"
 
 	// "github.com/gorilla/mux"
 	"github.com/gorilla/mux"
@@ -27,8 +28,8 @@ import (
 )
 
 var (
-	user *entities.User
-	// userNotPassword *entities.UserWithoutPassword
+
+// userNotPassword *entities.UserWithoutPassword
 
 // errValueNotExist = fmt.Errorf("record not found")
 // emailIsDuplicate = `ERROR: duplicate key value violates unique constraint "users_email_key" (SQLSTATE 23505)`
@@ -42,6 +43,8 @@ var (
 // Here I just create the user, I don't have any JWT authenticate here
 func CreateUser() http.HandlerFunc {
 	return func(response http.ResponseWriter, req *http.Request) {
+		var user *entities.User
+
 		json.NewDecoder(req.Body).Decode(&user)
 
 		// se o bcrypt falhar o usuário não poderá ser criado de forma alguma
@@ -141,7 +144,7 @@ func ShowUser() http.HandlerFunc {
 			return
 		}
 
-		user, err := repos.User.GetById(context.Background(), int64(id))
+		user, err := repos.User.GetById(context.Background(), id)
 		if err != nil {
 			response.WriteHeader(http.StatusInternalServerError)
 
@@ -158,26 +161,69 @@ func ShowUser() http.HandlerFunc {
 	}
 }
 
-/*
 // This function will update the user data
 // I was using insomnia and when I updated user data 1
 // it was no longer listed at the beginning of the function
 //
 //  The last user to be modified goes to the end of ListAll()
 //  At least that is how it was for me using *Insomnia*
-func (user *User) UpdateUser() http.HandlerFunc {
+func UpdateUser() http.HandlerFunc {
 	return func(response http.ResponseWriter, request *http.Request) {
+		var user entities.User
+
+		json.NewDecoder(request.Body).Decode(&user)
+
 		params := mux.Vars(request)
-		fmt.Println(params)
 
-		json.NewDecoder(request.Body).Decode(user)
+		repos := repositories.New(repositories.Options{
+			ReaderSqlx: configs.GetReaderSqlx(),
+			WriterSqlx: configs.GetWriterSqlx(),
+		})
 
-		// user.UpdatedAt = time.Now()
+		id, err := strconv.Atoi(params["id"])
+		if err != nil {
+			response.WriteHeader(http.StatusBadRequest)
+
+			json.NewEncoder(response).Encode(map[string]string{
+				"message": "My bad!",
+			})
+
+			return
+		}
+
+		hash, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+		if err != nil {
+			response.WriteHeader(http.StatusInternalServerError)
+
+			json.NewEncoder(response).Encode(map[string]string{
+				"message": fmt.Sprint(err, "\n"),
+				"Bcrypt":  "Hash not created",
+			})
+
+			// the return after the error the application continues that prevents
+			return
+		}
+
+		user.Password = hash
+		user.UpdatedAt = time.Now()
+
+		err = repos.User.UpdateById(context.Background(), id, user)
+		if err != nil {
+			fmt.Println(err)
+			response.WriteHeader(http.StatusInternalServerError)
+
+			json.NewEncoder(response).Encode(map[string]string{
+				"message": fmt.Sprint(err),
+			})
+
+			return
+		}
 
 		json.NewEncoder(response).Encode(user)
 	}
 }
 
+/*
 // Will delete a user by id
 func (user *User) DeleteUser() http.HandlerFunc {
 	return func(response http.ResponseWriter, request *http.Request) {
