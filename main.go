@@ -17,6 +17,7 @@ import (
 	"os"
 
 	"github.com/jhamiltonjunior/ecommerce-backend/src/routes"
+	"github.com/jhamiltonjunior/ecommerce-backend/src/services"
 	"github.com/joho/godotenv"
 )
 
@@ -35,6 +36,8 @@ func main() {
 		fmt.Println(err)
 		return
 	}
+
+	services.GenerateToken(5)
 
 	routes.NewServer()
 
