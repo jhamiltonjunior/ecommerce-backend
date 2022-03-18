@@ -24,6 +24,7 @@ import (
 	"github.com/jhamiltonjunior/ecommerce-backend/src/configs"
 	"github.com/jhamiltonjunior/ecommerce-backend/src/entities"
 	"github.com/jhamiltonjunior/ecommerce-backend/src/repositories"
+	"github.com/jhamiltonjunior/ecommerce-backend/src/services"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -68,7 +69,7 @@ func CreateUser() http.HandlerFunc {
 			WriterSqlx: configs.GetWriterSqlx(),
 		})
 
-		err = repos.User.Create(context.Background(), entities.User{
+		id, err := repos.User.Create(context.Background(), entities.User{
 			FullName: user.FullName,
 			Email:    user.Email,
 			Password: hash,
@@ -112,9 +113,12 @@ func CreateUser() http.HandlerFunc {
 		// 	return
 		// }
 
+		token := services.GenerateToken(id)
+
 		response.WriteHeader(http.StatusCreated)
 		json.NewEncoder(response).Encode(map[string]string{
 			"Success": fmt.Sprintf("user: %v, created with success!", user.FullName),
+			"token": token,
 		})
 	}
 

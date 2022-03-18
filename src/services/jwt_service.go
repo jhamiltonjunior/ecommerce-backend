@@ -8,13 +8,13 @@ import (
 )
 
 type Claims struct {
-	ID int
+	ID int64
 	jwt.StandardClaims
 }
 
 const SECRETE_KEY = "marakd"
 
-func GenerateToken(userId int) string {
+func GenerateTokenFrom(userId int64) string {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, Claims{
 		ID: userId,
 		StandardClaims: jwt.StandardClaims{
@@ -28,4 +28,12 @@ func GenerateToken(userId int) string {
 	fmt.Printf("%v%v \n\n", signedString, err)
 
 	return signedString
+}
+
+
+func GetUserId(token string) {
+	// claims := &Claims{}
+	// jwt.ParseWithClaims(token, claims, func(t *jwt.Token) (interface{}, error) {
+
+	// })
 }

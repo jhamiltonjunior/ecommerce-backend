@@ -1,24 +1,23 @@
 package configs
 
-import (
-	"os"
+// import (
+// 	"os"
 
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
-)
+// 	"gorm.io/driver/postgres"
+// 	"gorm.io/gorm"
+// )
 
-// America/Sao_Paulo
-func OpenDB() (*gorm.DB, error) {
-	db, err := gorm.Open(postgres.New(postgres.Config{
-		DSN: os.Getenv("DATA_SOURCE_NAME"),
-		PreferSimpleProtocol: true, // disables implicit prepared statement usage
-	}), &gorm.Config{})
-	if err != nil {
-		return nil, err
-	}
+// // America/Sao_Paulo
+// func OpenDB() (*gorm.DB, error) {
+// 	db, err := gorm.Open(postgres.New(postgres.Config{
+// 		DSN: os.Getenv("DATA_SOURCE_NAME"),
+// 		PreferSimpleProtocol: true, // disables implicit prepared statement usage
+// 	}), &gorm.Config{})
+// 	if err != nil {
+// 		return nil, err
+// 	}
 
-	return db, nil
-}
+// 	// db.Last()
 
-
-// , &gorm.Config{})
+// 	return db, nil
+// }
