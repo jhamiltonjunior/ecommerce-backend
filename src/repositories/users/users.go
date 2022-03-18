@@ -7,7 +7,7 @@ import (
 )
 
 type UserRepositories interface {
-	Create(ctx context.Context, newUser entities.User) (int64, error)
+	Create(ctx context.Context, newUser entities.User) (interface{}, error)
 	GetById(ctx context.Context, ID int) (*entities.UserWithoutPassword, error)
 
 	UpdateById(ctx context.Context, ID int, user entities.User) (error)

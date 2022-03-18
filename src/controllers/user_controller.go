@@ -50,7 +50,7 @@ func CreateUser() http.HandlerFunc {
 
 		// se o bcrypt falhar o usuário não poderá ser criado de forma alguma
 		// pois é provavél que a senha vai está com valor null, ainda que passe daqui,
-		// já está setado no banco de dados para que a senha seja not null
+		// (em production) já estará setado no banco de dados para que a senha seja not null
 		hash, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 		if err != nil {
 			response.WriteHeader(http.StatusInternalServerError)
@@ -67,6 +67,8 @@ func CreateUser() http.HandlerFunc {
 		repos := repositories.New(repositories.Options{
 			ReaderSqlx: configs.GetReaderSqlx(),
 			WriterSqlx: configs.GetWriterSqlx(),
+			WriterPgx: configs.GetReaderPgx(),
+			// ReaderPgx: configs.GetWriterPgx(),
 		})
 
 		id, err := repos.User.Create(context.Background(), entities.User{
@@ -75,7 +77,7 @@ func CreateUser() http.HandlerFunc {
 			Password: hash,
 		})
 		if err != nil {
-			fmt.Println(err)
+			// fmt.Println(err)
 
 			response.WriteHeader(http.StatusInternalServerError)
 
@@ -86,34 +88,16 @@ func CreateUser() http.HandlerFunc {
 			return
 		}
 
-		// if result := db.Create(&user); result.Error != nil {
 		// 	emailIsDuplicate := IsDuplicate("users_email_key")
 		// 	message := result.Error.Error()
-
 		// 	fmt.Println(result.Error.Error())
-
 		// 	fmt.Println(result.RowsAffected)
-
 		// 	if message == emailIsDuplicate {
 		// 		response.WriteHeader(http.StatusBadRequest)
-
-		//
-
 		// 		return
 		// 	}
 
-		// 	response.WriteHeader(http.StatusInternalServerError)
-
-		// 	// Se a condição anterior for false esse json vai ser enviado
-		// 	// se for true esse json não será enviado, por causo do return no fim do if
-		// 	json.NewEncoder(response).Encode(map[string]string{
-		// 		"message": result.Error.Error(),
-		// 	})
-
-		// 	return
-		// }
-
-		token := services.GenerateToken(id)
+		token := services.GenerateTokenFrom(id)
 
 		response.WriteHeader(http.StatusCreated)
 		json.NewEncoder(response).Encode(map[string]string{

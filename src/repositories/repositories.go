@@ -1,6 +1,7 @@
 package repositories
 
 import (
+	"github.com/jackc/pgx/v4"
 	"github.com/jhamiltonjunior/ecommerce-backend/src/repositories/users"
 	"github.com/jmoiron/sqlx"
 )
@@ -12,6 +13,9 @@ type Container struct {
 type Options struct {
 	WriterSqlx *sqlx.DB
 	ReaderSqlx *sqlx.DB
+	
+	WriterPgx *pgx.Conn
+	ReaderPgx *pgx.Conn
 
 	// WriterGorm *gorm.DB ???
 	// ReaderGorm *gorm.DB ???
@@ -19,6 +23,6 @@ type Options struct {
 
 func New(opts Options) *Container {
 	return &Container{
-		User: users.NewSqlxRespository(opts.WriterSqlx, opts.ReaderSqlx),
+		User: users.NewPgxRepository(opts.WriterPgx, opts.ReaderPgx),
 	}
 }

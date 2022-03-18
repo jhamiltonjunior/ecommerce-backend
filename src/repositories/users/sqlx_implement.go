@@ -17,7 +17,7 @@ func NewSqlxRespository(w *sqlx.DB, r *sqlx.DB) UserRepositories {
 	return &repoSqlx{writer: w, reader: r}
 }
 
-func (repo *repoSqlx) Create(ctx context.Context, newUser entities.User) (int64, error) {
+func (repo *repoSqlx) Create(ctx context.Context, newUser entities.User) (interface{}, error) {
 	result, err := repo.writer.ExecContext(ctx, `
 		INSERT INTO users (full_name, email, password) VALUES ($1, $2, $3) RETURNING *
 	`, newUser.FullName, newUser.Email, newUser.Password)
@@ -59,7 +59,7 @@ func (repo *repoSqlx) GetById(ctx context.Context, id int) (*entities.UserWithou
 
 func (repo *repoSqlx) UpdateById(ctx context.Context, id int, user entities.User) error {
 
-	_, err := repo.reader.ExecContext(ctx, `
+	_, err := repo.writer.ExecContext(ctx, `
 		UPDATE users
 		SET
 			full_name = $2,
