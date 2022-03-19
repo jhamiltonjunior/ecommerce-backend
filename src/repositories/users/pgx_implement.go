@@ -42,7 +42,7 @@ func (repo *repoPgx) Create(ctx context.Context, newUser entities.User) (interfa
 func (repo *repoPgx) GetById(ctx context.Context, id int) (*entities.UserWithoutPassword, error) {
 	var user entities.UserWithoutPassword
 
-	err := repo.reader.QueryRow(context.Background(), `
+	err := repo.reader.QueryRow(ctx, `
 		SELECT 
 			id,
 			full_name,
