@@ -21,19 +21,17 @@ func NewPgxRepository(w *pgx.Conn, r *pgx.Conn) UserRepositories {
 }
 
 func (repo *repoPgx) Create(ctx context.Context, newUser entities.User) (interface{}, error) {
-	row, err := repo.writer.Query(ctx, `
+	rows, err := repo.writer.Query(ctx, `
 		INSERT INTO users (full_name, email, password) VALUES ($1, $2, $3) RETURNING *
 	`, newUser.FullName, newUser.Email, newUser.Password)
 	if err != nil {
 		return 0, err
 	}
-	defer row.Close()
-	row.Next()
-	// fmt.Println(row.Values())
-	
+	defer rows.Close()
 	var id interface{}
-	// row.Next()
-	items, _ := row.Values()
+
+	rows.Next()
+	items, _ := rows.Values()
 	id = items[0]
 
 	fmt.Println(items[0])
@@ -41,10 +39,28 @@ func (repo *repoPgx) Create(ctx context.Context, newUser entities.User) (interfa
 	return id, nil
 }
 
-func (repo *repoPgx) GetById(ctx context.Context, ID int) (*entities.UserWithoutPassword, error) {
-	var user *entities.UserWithoutPassword
+func (repo *repoPgx) GetById(ctx context.Context, id int) (*entities.UserWithoutPassword, error) {
+	var user entities.UserWithoutPassword
 
-	return user, nil
+	err := repo.reader.QueryRow(context.Background(), `
+		SELECT 
+			id,
+			full_name,
+			email,
+			created_at,
+			updated_at
+		FROM users
+		WHERE id=$1
+	`, id).Scan(
+		&user.ID, &user.FullName,
+		&user.Email, &user.CreatedAt,
+		&user.UpdatedAt,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
 }
 
 func (repo *repoPgx) UpdateById(ctx context.Context, ID int, user entities.User) error {

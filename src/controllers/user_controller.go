@@ -67,7 +67,8 @@ func CreateUser() http.HandlerFunc {
 		repos := repositories.New(repositories.Options{
 			ReaderSqlx: configs.GetReaderSqlx(),
 			WriterSqlx: configs.GetWriterSqlx(),
-			WriterPgx: configs.GetReaderPgx(),
+			WriterPgx: configs.GetWriterPgx(),
+			ReaderPgx: configs.GetReaderPgx(),
 			// ReaderPgx: configs.GetWriterPgx(),
 		})
 
@@ -117,8 +118,10 @@ func ShowUser() http.HandlerFunc {
 		params := mux.Vars(request)
 
 		repos := repositories.New(repositories.Options{
-			ReaderSqlx: configs.GetReaderSqlx(),
 			WriterSqlx: configs.GetWriterSqlx(),
+			ReaderSqlx: configs.GetReaderSqlx(),
+			WriterPgx: configs.GetWriterPgx(),
+			ReaderPgx: configs.GetReaderPgx(),
 		})
 
 		id, err := strconv.Atoi(params["id"])
@@ -143,9 +146,8 @@ func ShowUser() http.HandlerFunc {
 			return
 		}
 
-		// user.Password = []byte("")
 		response.WriteHeader(http.StatusOK)
-		json.NewEncoder(response).Encode(user)
+		json.NewEncoder(response).Encode(&user)
 	}
 }
 
