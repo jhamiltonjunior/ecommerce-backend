@@ -21,10 +21,9 @@ import (
 
 	// "github.com/gorilla/mux"
 	"github.com/gorilla/mux"
-	"github.com/jhamiltonjunior/ecommerce-backend/src/configs"
 	"github.com/jhamiltonjunior/ecommerce-backend/src/entities"
-	"github.com/jhamiltonjunior/ecommerce-backend/src/repositories"
 	"github.com/jhamiltonjunior/ecommerce-backend/src/services"
+	"github.com/jhamiltonjunior/ecommerce-backend/src/util"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -64,13 +63,7 @@ func CreateUser() http.HandlerFunc {
 			return
 		}
 
-		repos := repositories.New(repositories.Options{
-			ReaderSqlx: configs.GetReaderSqlx(),
-			WriterSqlx: configs.GetWriterSqlx(),
-			WriterPgx:  configs.GetWriterPgx(),
-			ReaderPgx:  configs.GetReaderPgx(),
-			// ReaderPgx: configs.GetWriterPgx(),
-		})
+		repos := util.NewRepositories()
 
 		id, err := repos.User.Create(context.Background(), entities.User{
 			FullName: user.FullName,
@@ -117,12 +110,7 @@ func ShowUser() http.HandlerFunc {
 	return func(response http.ResponseWriter, request *http.Request) {
 		params := mux.Vars(request)
 
-		repos := repositories.New(repositories.Options{
-			WriterSqlx: configs.GetWriterSqlx(),
-			ReaderSqlx: configs.GetReaderSqlx(),
-			WriterPgx:  configs.GetWriterPgx(),
-			ReaderPgx:  configs.GetReaderPgx(),
-		})
+		repos := util.NewRepositories()
 
 		id, err := strconv.Atoi(params["id"])
 		if err != nil {
@@ -165,12 +153,7 @@ func UpdateUser() http.HandlerFunc {
 
 		params := mux.Vars(request)
 
-		repos := repositories.New(repositories.Options{
-			ReaderSqlx: configs.GetReaderSqlx(),
-			WriterSqlx: configs.GetWriterSqlx(),
-			WriterPgx:  configs.GetWriterPgx(),
-			ReaderPgx:  configs.GetReaderPgx(),
-		})
+		repos := util.NewRepositories()
 
 		id, err := strconv.Atoi(params["id"])
 		if err != nil {
@@ -231,12 +214,7 @@ func DeleteUser() http.HandlerFunc {
 			return
 		}
 
-		repos := repositories.New(repositories.Options{
-			ReaderSqlx: configs.GetReaderSqlx(),
-			WriterSqlx: configs.GetWriterSqlx(),
-			WriterPgx:  configs.GetWriterPgx(),
-			ReaderPgx:  configs.GetReaderPgx(),
-		})
+		repos := util.NewRepositories()
 
 		err = repos.User.DeleteById(int64(id))
 		if err != nil {
