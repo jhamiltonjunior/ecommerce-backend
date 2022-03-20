@@ -37,7 +37,7 @@ func (repo *repoSqlx) Create(ctx context.Context, newUser entities.User) (interf
 	return id, nil
 }
 
-func (repo *repoSqlx) GetById(ctx context.Context, id int) (*entities.UserWithoutPassword, error) {
+func (repo *repoSqlx) GetById(ctx context.Context, id int64) (*entities.UserWithoutPassword, error) {
 	var user entities.UserWithoutPassword
 
 	err := repo.reader.Get(&user, `
@@ -57,7 +57,7 @@ func (repo *repoSqlx) GetById(ctx context.Context, id int) (*entities.UserWithou
 	return &user, nil
 }
 
-func (repo *repoSqlx) UpdateById(ctx context.Context, id int, user entities.User) error {
+func (repo *repoSqlx) UpdateById(ctx context.Context, id int64, user *entities.User) (*entities.User, error) {
 
 	_, err := repo.writer.ExecContext(ctx, `
 		UPDATE users
@@ -69,13 +69,15 @@ func (repo *repoSqlx) UpdateById(ctx context.Context, id int, user entities.User
 		WHERE id=$1
 	`, id, user.FullName, user.Email, user.Password, user.UpdatedAt)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	// lastId, _ := result.LastInsertId()
+
+	return nil, nil
 }
 
-func (repo *repoSqlx) DeleteById(id int) error {
+func (repo *repoSqlx) DeleteById(id int64) error {
 	if _, err := repo.writer.Exec("DELETE FROM users WHERE id=$1", id); err != nil {
 		return err
 	}

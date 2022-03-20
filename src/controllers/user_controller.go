@@ -67,8 +67,8 @@ func CreateUser() http.HandlerFunc {
 		repos := repositories.New(repositories.Options{
 			ReaderSqlx: configs.GetReaderSqlx(),
 			WriterSqlx: configs.GetWriterSqlx(),
-			WriterPgx: configs.GetWriterPgx(),
-			ReaderPgx: configs.GetReaderPgx(),
+			WriterPgx:  configs.GetWriterPgx(),
+			ReaderPgx:  configs.GetReaderPgx(),
 			// ReaderPgx: configs.GetWriterPgx(),
 		})
 
@@ -103,7 +103,7 @@ func CreateUser() http.HandlerFunc {
 		response.WriteHeader(http.StatusCreated)
 		json.NewEncoder(response).Encode(map[string]string{
 			"Success": fmt.Sprintf("user: %v, created with success!", user.FullName),
-			"token": token,
+			"token":   token,
 		})
 	}
 
@@ -120,8 +120,8 @@ func ShowUser() http.HandlerFunc {
 		repos := repositories.New(repositories.Options{
 			WriterSqlx: configs.GetWriterSqlx(),
 			ReaderSqlx: configs.GetReaderSqlx(),
-			WriterPgx: configs.GetWriterPgx(),
-			ReaderPgx: configs.GetReaderPgx(),
+			WriterPgx:  configs.GetWriterPgx(),
+			ReaderPgx:  configs.GetReaderPgx(),
 		})
 
 		id, err := strconv.Atoi(params["id"])
@@ -135,7 +135,7 @@ func ShowUser() http.HandlerFunc {
 			return
 		}
 
-		user, err := repos.User.GetById(context.Background(), id)
+		user, err := repos.User.GetById(context.Background(), int64(id))
 		if err != nil {
 			response.WriteHeader(http.StatusInternalServerError)
 
@@ -159,7 +159,7 @@ func ShowUser() http.HandlerFunc {
 //  At least that is how it was for me using *Insomnia*
 func UpdateUser() http.HandlerFunc {
 	return func(response http.ResponseWriter, request *http.Request) {
-		var user entities.User
+		var user *entities.User
 
 		json.NewDecoder(request.Body).Decode(&user)
 
@@ -168,6 +168,8 @@ func UpdateUser() http.HandlerFunc {
 		repos := repositories.New(repositories.Options{
 			ReaderSqlx: configs.GetReaderSqlx(),
 			WriterSqlx: configs.GetWriterSqlx(),
+			WriterPgx:  configs.GetWriterPgx(),
+			ReaderPgx:  configs.GetReaderPgx(),
 		})
 
 		id, err := strconv.Atoi(params["id"])
@@ -197,7 +199,7 @@ func UpdateUser() http.HandlerFunc {
 		user.Password = hash
 		user.UpdatedAt = time.Now()
 
-		err = repos.User.UpdateById(context.Background(), id, user)
+		userUpdated, err := repos.User.UpdateById(context.Background(), int64(id), user)
 		if err != nil {
 			fmt.Println(err)
 			response.WriteHeader(http.StatusInternalServerError)
@@ -209,10 +211,9 @@ func UpdateUser() http.HandlerFunc {
 			return
 		}
 
-		json.NewEncoder(response).Encode(user)
+		json.NewEncoder(response).Encode(userUpdated)
 	}
 }
-
 
 // Will delete a user by id
 func DeleteUser() http.HandlerFunc {
@@ -235,7 +236,7 @@ func DeleteUser() http.HandlerFunc {
 			WriterSqlx: configs.GetWriterSqlx(),
 		})
 
-		err = repos.User.DeleteById(id)
+		err = repos.User.DeleteById(int64(id))
 		if err != nil {
 			response.WriteHeader(http.StatusInternalServerError)
 
@@ -244,11 +245,8 @@ func DeleteUser() http.HandlerFunc {
 			})
 		}
 
-
-
 		json.NewEncoder(response).Encode(map[string]string{
 			"message": "User deleted with success!",
 		})
 	}
 }
-
