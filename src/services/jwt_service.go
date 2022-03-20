@@ -2,6 +2,7 @@ package services
 
 import (
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -12,7 +13,7 @@ type Claims struct {
 	jwt.StandardClaims
 }
 
-const SECRETE_KEY = "marakd"
+var SECRETE_KEY = os.Getenv("SECRETE_KEY")
 
 func GenerateTokenFrom(userId interface{}) string {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, Claims{
