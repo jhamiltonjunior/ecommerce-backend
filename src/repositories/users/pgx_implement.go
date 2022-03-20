@@ -85,6 +85,11 @@ func (repo *repoPgx) UpdateById(ctx context.Context, id int64, user *entities.Us
 
 	return user, nil
 }
-func (repo *repoPgx) DeleteById(ID int64) error {
-	panic("This not inplemented!")
+func (repo *repoPgx) DeleteById(id int64) error {
+	_, err := repo.writer.Exec(context.Background(), "DELETE FROM users WHERE id=$1", id)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

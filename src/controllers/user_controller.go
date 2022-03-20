@@ -234,6 +234,8 @@ func DeleteUser() http.HandlerFunc {
 		repos := repositories.New(repositories.Options{
 			ReaderSqlx: configs.GetReaderSqlx(),
 			WriterSqlx: configs.GetWriterSqlx(),
+			WriterPgx:  configs.GetWriterPgx(),
+			ReaderPgx:  configs.GetReaderPgx(),
 		})
 
 		err = repos.User.DeleteById(int64(id))
