@@ -16,7 +16,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"strconv"
 	"time"
 
 	// "github.com/gorilla/mux"
@@ -112,7 +111,7 @@ func ShowUser() http.HandlerFunc {
 
 		repos := util.NewRepositories()
 
-		id, err := strconv.Atoi(params["id"])
+		id, err := util.ConvertToInt(params)
 		if err != nil {
 			response.WriteHeader(http.StatusBadRequest)
 
@@ -123,7 +122,7 @@ func ShowUser() http.HandlerFunc {
 			return
 		}
 
-		user, err := repos.User.GetById(context.Background(), int64(id))
+		user, err := repos.User.GetById(context.Background(), id)
 		if err != nil {
 			response.WriteHeader(http.StatusInternalServerError)
 
@@ -155,7 +154,7 @@ func UpdateUser() http.HandlerFunc {
 
 		repos := util.NewRepositories()
 
-		id, err := strconv.Atoi(params["id"])
+		id, err := util.ConvertToInt(params)
 		if err != nil {
 			response.WriteHeader(http.StatusBadRequest)
 
@@ -182,7 +181,7 @@ func UpdateUser() http.HandlerFunc {
 		user.Password = hash
 		user.UpdatedAt = time.Now()
 
-		userUpdated, err := repos.User.UpdateById(context.Background(), int64(id), user)
+		userUpdated, err := repos.User.UpdateById(context.Background(), id, user)
 		if err != nil {
 			fmt.Println(err)
 			response.WriteHeader(http.StatusInternalServerError)
@@ -203,7 +202,7 @@ func DeleteUser() http.HandlerFunc {
 	return func(response http.ResponseWriter, request *http.Request) {
 		params := mux.Vars(request)
 
-		id, err := strconv.Atoi(params["id"])
+		id, err := util.ConvertToInt(params)
 		if err != nil {
 			response.WriteHeader(http.StatusBadRequest)
 
@@ -216,7 +215,7 @@ func DeleteUser() http.HandlerFunc {
 
 		repos := util.NewRepositories()
 
-		err = repos.User.DeleteById(int64(id))
+		err = repos.User.DeleteById(id)
 		if err != nil {
 			response.WriteHeader(http.StatusInternalServerError)
 
